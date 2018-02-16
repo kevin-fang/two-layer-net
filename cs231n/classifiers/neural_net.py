@@ -74,9 +74,10 @@ class TwoLayerNet(object):
         # Store the result in the scores variable, which should be an array of      #
         # shape (N, C).                                                             #
         #############################################################################
-        layer = W1.T.dot(X.T).T + b1
-        layer[layer < 0] = 0
-        scores = W2.T.dot(layer.T).T + b2
+        first_layer = X.dot(W1) + b1
+        layer = np.copy(first_layer)
+        layer[first_layer < 0] = 0
+        scores = layer.dot(W2) + b2
          #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -128,7 +129,7 @@ class TwoLayerNet(object):
         # calculate the gradient - first, subtract 1 from correctly classified
         probs[y, np.arange(num_train)] -= 1
 
-        # calculate the dot product, regularize
+        # regularize
         probs /= num_train
         # Variables used for backprop
         # a = w1 * x
@@ -148,7 +149,7 @@ class TwoLayerNet(object):
 
         # next_layer = max(0, probs * W2) to make further calculations easier
         next_layer = probs.T.dot(W2.T)
-        next_layer[next_layer < 0] = 0
+        next_layer[first_layer < 0] = 0
         
         # df/db1 = df/df * df/de * de/dd * dd/dc * dc/db * db/db1
         # df/db1 = 1     * probs * 1     * W2    * b < 0 * 1
@@ -182,7 +183,8 @@ class TwoLayerNet(object):
         - reg: Scalar giving regularization strength.
         - num_iters: Number of steps to take when optimizing.
         - batch_size: Number of training examples to use per step.
-        - verbose: boolean; if true print progress during optimization.
+        - verbose: boolean; if true 
+ progress during optimization.
         """
         num_train = X.shape[0]
         iterations_per_epoch = max(num_train / batch_size, 1)
